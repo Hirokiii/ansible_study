@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+  ansible_target1:
+    image: ubuntu:latest
+    container_name: ansible_target1
+    volumes:
+      - ./container_command.sh:/usr/local/bin/container_command.sh
+    networks:
+      ansible_network:
+        ipv4_address: 172.28.1.2
+    environment:
+      - MY_USERNAME
+      - MY_SSH_KEY
+    command:
+      - /bin/bash
+      - -c
+      - "/usr/local/bin/container_command.sh"
+
+  ansible_target2:
+    image: ubuntu:latest
+    container_name: ansible_target2
+    volumes:
+      - ./container_command.sh:/usr/local/bin/container_command.sh
+    networks:
+      ansible_network:
+        ipv4_address: 172.28.1.3
+    environment:
+      - MY_USERNAME
+      - MY_SSH_KEY
+    command:
+      - /bin/bash
+      - -c
+      - "/usr/local/bin/container_command.sh"
+
+  ansible_target3:
+    image: ubuntu:latest
+    container_name: ansible_target3
+    volumes:
+      - ./container_command.sh:/usr/local/bin/container_command.sh
+    networks:
+      ansible_network:
+        ipv4_address: 172.28.1.4
+    environment:
+      - MY_USERNAME
+      - MY_SSH_KEY
+    command:
+      - /bin/bash
+      - -c
+      - "/usr/local/bin/container_command.sh"
+
+networks:
+  ansible_network:
+    name: ansible_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
