@@ -24,4 +24,13 @@ $ ansible all -m apt -a name=tmux --become -K
 
 # with multiple arguments
 $ ansible all -m apt -a "name=snapd state=latest" --become -K
+
+# Run a playbook
+$ ansible-playbook -K .yml
+
+# List tags
+$ ansible-playbook --list-tags .yml
+
+# Only run the targetted tasks
+$ ansible-playbook -K --tags "<tag1>, <tag2>" .yml
 ```
