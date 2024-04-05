@@ -56,6 +56,19 @@
       owner: root
       group: root
       mode: 0644
+  
+  - name: change e-mail address for admin
+    tags: apache, centos, httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf 
+      regexp: '^ServerAdmin'
+      line: ServerAdmin example@example.net
+    when: ansible_distribution == "CentOS"
+    register: httpd
+
+  - name: restart apache for CentOS (without systemd)
+    command: /usr/sbin/httpd -k restart
+    when: httpd.changed
 
 - hosts: db_servers
   become: true
@@ -78,9 +91,15 @@
       state: latest
     when: ansible_distribution == "Ubuntu"
   
-  # - name: start mariadb for Ubuntu
-  #   command: mysqld_safe
-  #   when: ansible_distribution == "Ubuntu"
+  - name: Check if MariaDB is running (Ubuntu)
+    shell: pgrep mysqld > /dev/null; if [ $? -ne 0 ]; then echo "not running"; else echo "running"; fi
+    register: mariadb_status
+    ignore_errors: true
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Start MariaDB if not runnnig "Ubuntu"
+    command: mysqld_safe
+    when: mariadb_status.stdout == "not running"
 
 - hosts: file_servers
   become: true
