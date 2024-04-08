@@ -1,28 +1,13 @@
-- name: install apache and php packages for Ubuntu
+- name: install apache and php packages
   tags: apache, apache2, ubuntu
-  apt: 
+  package: 
     name: 
-      - apache2
-      - libapache2-mod-php
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
-  when: ansible_distribution == "Ubuntu"
 
-- name: start apache for Ubuntu
-  command: apache2ctl start
-  when: ansible_distribution == "Ubuntu"
-
-- name: install apache packages for CentOS
-  tags: httpd, centos, apache
-  yum: 
-    name: 
-      - httpd
-      - php
-    state: latest
-  when: ansible_distribution == "CentOS" and ansible_distribution_version == "7.9"
-
-- name: start apache for CentOS
-  command: /usr/sbin/httpd
-  when: ansible_distribution == "CentOS"
+- name: start apache
+  command: "{{ apache_service }}"
 
 - name: copy default html file for site
   tags: apache, apache2, httpd
@@ -38,10 +23,6 @@
   lineinfile:
     path: /etc/httpd/conf/httpd.conf 
     regexp: '^ServerAdmin'
-    line: ServerAdmin example@example.net
+    line: ServerAdmin example@example.com
   when: ansible_distribution == "CentOS"
-  register: httpd
-
-- name: restart apache for CentOS (without systemd)
-  command: /usr/sbin/httpd -k restart
-  when: httpd.changed
+  notify: restart_apache

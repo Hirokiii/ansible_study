@@ -1,0 +1,2 @@
+- name: restart_apache    # must be the same name you put in "notify"
+  command: "{{ apache_service }} -k restart"
