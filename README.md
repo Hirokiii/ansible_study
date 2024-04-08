@@ -31,6 +31,6 @@ $ ansible-playbook -K .yml
 # List tags
 $ ansible-playbook --list-tags .yml
 
-# Only run the targetted tasks
+# RUn only the tagged tasks
 $ ansible-playbook -K --tags "<tag1>, <tag2>" .yml
 ```
