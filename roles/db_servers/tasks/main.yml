@@ -1,0 +1,27 @@
+- name : install mariadb package (CentOS)
+  tags: centos, db, mariadb
+  yum:
+    name: mariadb
+    state: latest
+  when: ansible_distribution == "CentOS" and ansible_distribution_version == "7.9"
+
+# - name: start mariadb for CentOS
+#   command: /usr/bin/mysqld_safe
+#   when: ansible_distribution == "CentOS"
+
+- name : install mariadb package (Ubuntu)
+  tags: ubuntu, db, mariadb
+  apt:
+    name: mariadb-server
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: Check if MariaDB is running (Ubuntu)
+  shell: pgrep mysqld > /dev/null; if [ $? -ne 0 ]; then echo "not running"; else echo "running"; fi
+  register: mariadb_status
+  ignore_errors: true
+  when: ansible_distribution == "Ubuntu"
+
+- name: Start MariaDB if not runnnig "Ubuntu"
+  command: mysqld_safe
+  when: mariadb_status.stdout == "not running"

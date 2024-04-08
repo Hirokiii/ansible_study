@@ -20,102 +20,21 @@
 
 - hosts: all
   become: true
-  tasks:
-  
-  - name: add ssh key for simone
-    tags: always
-    authorized_key:
-      user: simone
-      key: "{{ lookup('env', 'MY_SSH_KEY')}}"
+  roles:
+    - base
 
 - hosts: web_servers
   become: true
-  tasks:
-
-  - name: install apache and php packages for Ubuntu
-    tags: apache, apache2, ubuntu
-    apt: 
-      name: 
-        - apache2
-        - libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: start apache for Ubuntu
-    command: apache2ctl start
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache packages for CentOS
-    tags: httpd, centos, apache
-    yum: 
-      name: 
-        - httpd
-        - php
-      state: latest
-    when: ansible_distribution == "CentOS" and ansible_distribution_version == "7.9"
-
-  - name: start apache for CentOS
-    command: /usr/sbin/httpd
-    when: ansible_distribution == "CentOS"
-
-  - name: copy default html file for site
-    tags: apache, apache2, httpd
-    copy:
-      src: ../files/default_site.html
-      dest: /var/www/html/index.html
-      owner: root
-      group: root
-      mode: 0644
-  
-  - name: change e-mail address for admin
-    tags: apache, centos, httpd
-    lineinfile:
-      path: /etc/httpd/conf/httpd.conf 
-      regexp: '^ServerAdmin'
-      line: ServerAdmin example@example.net
-    when: ansible_distribution == "CentOS"
-    register: httpd
-
-  - name: restart apache for CentOS (without systemd)
-    command: /usr/sbin/httpd -k restart
-    when: httpd.changed
+  roles:
+    - web_servers
 
 - hosts: db_servers
   become: true
-  tasks:
-  - name : install mariadb package (CentOS)
-    tags: centos, db, mariadb
-    yum:
-      name: mariadb
-      state: latest
-    when: ansible_distribution == "CentOS" and ansible_distribution_version == "7.9"
-  
-  # - name: start mariadb for CentOS
-  #   command: /usr/bin/mysqld_safe
-  #   when: ansible_distribution == "CentOS"
-
-  - name : install mariadb package (Ubuntu)
-    tags: ubuntu, db, mariadb
-    apt:
-      name: mariadb-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-  
-  - name: Check if MariaDB is running (Ubuntu)
-    shell: pgrep mysqld > /dev/null; if [ $? -ne 0 ]; then echo "not running"; else echo "running"; fi
-    register: mariadb_status
-    ignore_errors: true
-    when: ansible_distribution == "Ubuntu"
-
-  - name: Start MariaDB if not runnnig "Ubuntu"
-    command: mysqld_safe
-    when: mariadb_status.stdout == "not running"
+  roles:
+    - db_servers
 
 - hosts: file_servers
   become: true
-  tasks:
-  - name: install samba package
-    tags: samba
-    package:
-      name: samba
-      state: latest
+  roles:
+    - file_servers
+  
